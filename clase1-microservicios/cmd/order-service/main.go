@@ -5,28 +5,21 @@ import (
 	"net/http"
 
 	"clase1/starter/internal/orders"
-	"clase1/starter/internal/products"
 )
 
 func main() {
-	productRepo := products.NewRepository()
+	productClient := orders.NewHTTPProductClient("http://localhost:8081")
 	orderRepo := orders.NewRepository()
-
-	productService := products.NewService(productRepo)
-	orderService := orders.NewService(orderRepo, productRepo)
-
-	productHandler := products.NewHandler(productService)
+	orderService := orders.NewService(orderRepo, productClient)
 	orderHandler := orders.NewHandler(orderService)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
-	mux.HandleFunc("GET /products", productHandler.List)
-	mux.HandleFunc("GET /products/{id}", productHandler.GetByID)
 	mux.HandleFunc("GET /orders", orderHandler.List)
 	mux.HandleFunc("POST /orders", orderHandler.Create)
 
-	log.Println("starter api listening on :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	log.Println("order service listening on :8082")
+	if err := http.ListenAndServe(":8082", mux); err != nil {
 		log.Fatal(err)
 	}
 }

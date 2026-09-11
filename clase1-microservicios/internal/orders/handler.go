@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-
-	"clase1/starter/internal/products"
 )
 
 type Handler struct {
@@ -27,12 +25,12 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := h.service.Create(req)
+	order, err := h.service.Create(r.Context(), req)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidQuantity):
 			writeError(w, http.StatusBadRequest, "quantity must be greater than zero")
-		case errors.Is(err, products.ErrProductNotFound):
+		case errors.Is(err, ErrProductNotFound):
 			writeError(w, http.StatusNotFound, "product not found")
 		case errors.Is(err, ErrInsufficientStock):
 			writeError(w, http.StatusBadRequest, "insufficient stock")

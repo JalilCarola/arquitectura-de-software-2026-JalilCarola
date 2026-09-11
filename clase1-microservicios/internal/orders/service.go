@@ -1,9 +1,8 @@
 package orders
 
 import (
+	"context"
 	"errors"
-
-	"clase1/starter/internal/products"
 )
 
 var (
@@ -13,13 +12,13 @@ var (
 
 type Service struct {
 	orders   Repository
-	products products.Repository
+	products ProductClient
 }
 
-func NewService(orders Repository, productRepository products.Repository) *Service {
+func NewService(orders Repository, productClient ProductClient) *Service {
 	return &Service{
 		orders:   orders,
-		products: productRepository,
+		products: productClient,
 	}
 }
 
@@ -27,12 +26,12 @@ func (s *Service) GetAll() []Order {
 	return s.orders.GetAll()
 }
 
-func (s *Service) Create(req CreateOrderRequest) (Order, error) {
+func (s *Service) Create(ctx context.Context, req CreateOrderRequest) (Order, error) {
 	if req.Quantity <= 0 {
 		return Order{}, ErrInvalidQuantity
 	}
 
-	product, err := s.products.GetByID(req.ProductID)
+	product, err := s.products.GetProduct(ctx, req.ProductID)
 	if err != nil {
 		return Order{}, err
 	}
